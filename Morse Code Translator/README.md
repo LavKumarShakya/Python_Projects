@@ -90,17 +90,6 @@ The app is built with:
 - **Icons**: Font Awesome
 - **Styling**: CSS Grid, Flexbox, CSS animations
 
-## Deployment
-
-This Flask app can be easily deployed to:
-- **Heroku**
-- **Railway** 
-- **Render**
-- **PythonAnywhere**
-- **Any cloud provider supporting Python/Flask**
-
-For production deployment, consider using a production WSGI server like Gunicorn.
-
 ## License
 
 This project is open source and available under the MIT License.

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morse Code Translator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .translator-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+
+        .result.empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        .morse-chart {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        .chart-title {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .morse-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .morse-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .morse-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .morse-char {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .morse-code {
+            font-family: 'Courier New', monospace;
+            color: #764ba2;
+            font-weight: 600;
+        }
+
+        .loading {
+            display: none;
+            color: #667eea;
+        }
+
+        .error {
+            background: #ffe6e6;
+            border-left-color: #dc3545;
+            color: #dc3545;
+        }
+
+        .notes-section {
+            background: #e8f4fd;
+            border: 1px solid #b8daff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .notes-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1e5799;
+            margin-bottom: 15px;
+        }
+
+        .notes-content {
+            color: #2c5282;
+            line-height: 1.6;
+        }
+
+        .notes-list {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+
+        .notes-list li {
+            margin-bottom: 8px;
+        }
+
+        .code-example {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #2d3748;
+            margin: 5px 0;
+            display: inline-block;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 20px 30px;
+            margin-top: 40px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+
+        .footer .made-by {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .footer .credits {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .footer .heart {
+            color: #ff6b6b;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+
+            .morse-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 10px;
+            }
+
+            .footer {
+                padding: 15px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-satellite-dish"></i> Morse Code Translator</h1>
+            <p>Convert text to Morse code and vice versa</p>
+        </div>
+
+        <div class="content">
+            <!-- Notes Section -->
+            <div class="notes-section">
+                <h2 class="notes-title">
+                    <i class="fas fa-info-circle"></i>
+                    Notes & Rules
+                </h2>
+                <div class="notes-content">
+                    <p><strong>Important rules for using the Morse Code Translator:</strong></p>
+                    <ul class="notes-list">
+                        <li><strong>Supported Characters:</strong> Letters (A-Z), Numbers (0-9), and basic punctuation: <span class="code-example">. , ? / - ( )</span></li>
+                        <li><strong>Case Insensitive:</strong> Both uppercase and lowercase letters work the same way</li>
+                        <li><strong>Word Separation:</strong> Spaces between words are represented as <span class="code-example">/</span> in Morse code</li>
+                        <li><strong>Letter Separation:</strong> Individual Morse letters are separated by single spaces</li>
+                        <li><strong>Format Example:</strong> 
+                            <br>"HELLO WORLD" becomes <span class="code-example">.... . .-.. .-.. --- / .-- --- .-. .-.. -..</span>
+                        </li>
+                        <li><strong>Invalid Characters:</strong> Special symbols like @, #, $, %, etc. are not supported and will show an error</li>
+                        <li><strong>Keyboard Shortcut:</strong> Press <span class="code-example">Ctrl + Enter</span> to convert text quickly</li>
+                    </ul>
+                    <p><em><i class="fas fa-lightbulb"></i> Tip: Use the reference chart below to learn individual Morse code patterns!</em></p>
+                </div>
+            </div>
+
+            <!-- Text to Morse Section -->
+            <div class="translator-section">
+                <h2 class="section-title">
+                    <i class="fas fa-keyboard"></i>
+                    Text to Morse Code
+                </h2>
+                <div class="input-group">
+                    <label for="textInput">Enter your text:</label>
+                    <textarea 
+                        id="textInput" 
+                        class="text-input" 
+                        placeholder="Type your message here..."
+                        maxlength="500"
+                    ></textarea>
+                </div>
+                <button class="btn" onclick="encryptText()">
+                    <i class="fas fa-lock"></i>
+                    <span>Convert to Morse</span>
+                    <span class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </button>
+                <div id="encryptResult" class="result empty">
+                    Morse code will appear here...
+                </div>
+            </div>
+
+            <!-- Morse to Text Section -->
+            <div class="translator-section">
+                <h2 class="section-title">
+                    <i class="fas fa-satellite"></i>
+                    Morse Code to Text
+                </h2>
+                <div class="input-group">
+                    <label for="morseInput">Enter Morse code (use spaces between letters, / for word breaks):</label>
+                    <textarea 
+                        id="morseInput" 
+                        class="text-input" 
+                        placeholder="Enter Morse code like: .... . .-.. .-.. --- / .-- --- .-. .-.. -.."
+                        maxlength="1000"
+                    ></textarea>
+                </div>
+                <button class="btn" onclick="decryptMorse()">
+                    <i class="fas fa-unlock"></i>
+                    <span>Convert to Text</span>
+                    <span class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                </button>
+                <div id="decryptResult" class="result empty">
+                    Decrypted text will appear here...
+                </div>
+            </div>
+
+            <!-- Morse Code Reference Chart -->
+            <div class="morse-chart">
+                <h3 class="chart-title">
+                    <i class="fas fa-table"></i>
+                    Morse Code Reference Chart
+                </h3>
+                <div class="morse-grid" id="morseChart">
+                    <!-- Chart will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p class="made-by">Made with <span class="heart">❤️</span> by Lav Kumar Shakya</p>
+            <p class="credits">Software Developer | Tech Explorer | AI Enthusiast</p>
+        </div>
+    </div>
+
+    <script>
+        // Morse code reference for display
+        const morseReference = {
+            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+            'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+            'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+            'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+            'Y': '-.--', 'Z': '--..', '1': '.----', '2': '..---', '3': '...--', 
+            '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..', 
+            '9': '----.', '0': '-----'
+        };
+
+        // Populate Morse code chart
+        function populateMorseChart() {
+            const chartContainer = document.getElementById('morseChart');
+            
+            Object.entries(morseReference).forEach(([char, morse]) => {
+                const item = document.createElement('div');
+                item.className = 'morse-item';
+                item.innerHTML = `
+                    <div class="morse-char">${char}</div>
+                    <div class="morse-code">${morse}</div>
+                `;
+                chartContainer.appendChild(item);
+            });
+        }
+
+        // Encrypt text to Morse code
+        async function encryptText() {
+            const textInput = document.getElementById('textInput');
+            const resultDiv = document.getElementById('encryptResult');
+            const btn = event.target.closest('.btn');
+            const btnText = btn.querySelector('span:first-of-type');
+            const loading = btn.querySelector('.loading');
+
+            const text = textInput.value.trim();
+            
+            if (!text) {
+                showError(resultDiv, 'Please enter some text to convert.');
+                return;
+            }
+
+            // Show loading
+            btnText.style.display = 'none';
+            loading.style.display = 'inline-flex';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/encrypt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult(resultDiv, data.encrypted);
+                } else {
+                    showError(resultDiv, data.error || 'An error occurred');
+                }
+            } catch (error) {
+                showError(resultDiv, 'Network error. Please try again.');
+            } finally {
+                // Hide loading
+                btnText.style.display = 'inline';
+                loading.style.display = 'none';
+                btn.disabled = false;
+            }
+        }
+
+        // Decrypt Morse code to text
+        async function decryptMorse() {
+            const morseInput = document.getElementById('morseInput');
+            const resultDiv = document.getElementById('decryptResult');
+            const btn = event.target.closest('.btn');
+            const btnText = btn.querySelector('span:first-of-type');
+            const loading = btn.querySelector('.loading');
+
+            const morse = morseInput.value.trim();
+            
+            if (!morse) {
+                showError(resultDiv, 'Please enter Morse code to convert.');
+                return;
+            }
+
+            // Show loading
+            btnText.style.display = 'none';
+            loading.style.display = 'inline-flex';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/decrypt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ morse: morse })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult(resultDiv, data.decrypted);
+                } else {
+                    showError(resultDiv, data.error || 'An error occurred');
+                }
+            } catch (error) {
+                showError(resultDiv, 'Network error. Please try again.');
+            } finally {
+                // Hide loading
+                btnText.style.display = 'inline';
+                loading.style.display = 'none';
+                btn.disabled = false;
+            }
+        }
+
+        // Show result
+        function showResult(element, text) {
+            element.textContent = text;
+            element.className = 'result';
+        }
+
+        // Show error
+        function showError(element, message) {
+            element.textContent = message;
+            element.className = 'result error';
+        }
+
+        // Allow Enter key to trigger conversion
+        document.getElementById('textInput').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                encryptText();
+            }
+        });
+
+        document.getElementById('morseInput').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                decryptMorse();
+            }
+        });
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            populateMorseChart();
+        });
+    </script>
+</body>
+</html>
